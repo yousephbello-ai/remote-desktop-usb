@@ -1,0 +1,9 @@
+
+{
+  "devices": [],
+  "security": {
+    "require_authentication": true,
+    "require_user_approval": true,
+    "encrypted_connections_only": true
+  }
+}
