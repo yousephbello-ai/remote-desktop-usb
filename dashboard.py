@@ -1,79 +1,91 @@
 
-"""Remote Desktop USB Toolkit dashboard."""
+"""Remote Desktop USB Toolkit — device dashboard."""
 
-import platform
+import json
 import tkinter as tk
-import webbrowser
-from tkinter import messagebox
+from pathlib import Path
+from tkinter import messagebox, simpledialog
+
+REGISTRY = Path(__file__).parent / "device_registry.json"
 
 
-RUSTDESK_DOWNLOAD = "https://rustdesk.com/"
-RUSTDESK_GUIDE = "https://rustdesk.com/docs/en/"
+def load_devices():
+    try:
+        data = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        return data.get("devices", [])
+    except (OSError, json.JSONDecodeError):
+        return []
 
 
-def open_download():
-    webbrowser.open(RUSTDESK_DOWNLOAD)
+def refresh_devices():
+    device_list.delete(0, tk.END)
+    for device in load_devices():
+        device_list.insert(tk.END, device["name"])
 
 
-def open_guide():
-    webbrowser.open(RUSTDESK_GUIDE)
+def add_device():
+    name = simpledialog.askstring(
+        "Register device",
+        "Enter a name for your authorized computer:"
+    )
+    if not name or not name.strip():
+        return
 
+    devices = load_devices()
+    devices.append({"name": name.strip()})
 
-def show_status():
+    REGISTRY.write_text(
+        json.dumps(
+            {
+                "devices": devices,
+                "security": {
+                    "require_authentication": True,
+                    "require_user_approval": True,
+                    "encrypted_connections_only": True
+                }
+            },
+            indent=2
+        ),
+        encoding="utf-8"
+    )
+
+    refresh_devices()
     messagebox.showinfo(
-        "Connection status",
-        "The dashboard is running.\n\n"
-        "Remote connection integration is not configured yet."
+        "Device added",
+        "The device name was saved locally."
     )
 
 
 root = tk.Tk()
 root.title("Remote Desktop USB Toolkit")
-root.geometry("440x360")
-root.minsize(360, 320)
+root.geometry("440x420")
 
 tk.Label(
     root,
-    text="Remote Desktop USB Toolkit",
+    text="Authorized Device Manager",
     font=("Arial", 16, "bold")
-).pack(pady=(24, 8))
+).pack(pady=16)
 
-tk.Label(
-    root,
-    text=f"Operating system: {platform.system()}"
-).pack(pady=4)
-
-tk.Label(
-    root,
-    text="Authorized device management",
-    font=("Arial", 11)
-).pack(pady=8)
+device_list = tk.Listbox(root, height=12, width=42)
+device_list.pack(padx=16, pady=8)
 
 tk.Button(
     root,
-    text="Check Dashboard Status",
-    command=show_status,
-    width=28
+    text="Add Device Name",
+    command=add_device
 ).pack(pady=6)
 
 tk.Button(
     root,
-    text="Get Remote Desktop Client",
-    command=open_download,
-    width=28
-).pack(pady=6)
-
-tk.Button(
-    root,
-    text="Read Connection Guide",
-    command=open_guide,
-    width=28
+    text="Refresh List",
+    command=refresh_devices
 ).pack(pady=6)
 
 tk.Label(
     root,
-    text="Remote connections are not yet configured.",
-    wraplength=350
-).pack(pady=18)
+    text="Names only — remote connections are not enabled.",
+    wraplength=360
+).pack(pady=12)
 
+refresh_devices()
 root.mainloop()
