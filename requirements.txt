@@ -1,1 +1,4 @@
 
+# Core toolkit currently uses Python's standard library.
+# No third-party dependencies are required yet.
+
