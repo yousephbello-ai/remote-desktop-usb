@@ -1,243 +1,173 @@
 
-"""Remote Desktop USB Toolkit.
-Dashboard and authorized-device launcher.
-"""
+"""Remote Desktop USB Toolkit — Dashboard."""
 
-import json
 import platform
-import re
 import shutil
 import subprocess
-import sys
 import tkinter as tk
 import webbrowser
 
-from pathlib import Path
 from tkinter import messagebox, simpledialog
 
-BASE_DIR = Path(__file__).resolve().parent
-REGISTRY = BASE_DIR / "device_registry.json"
+from device_manager import add_device, remove_device, list_devices
 
 RUSTDESK_URL = "https://rustdesk.com/"
 RUSTDESK_GUIDE = "https://rustdesk.com/docs/en/"
 
 
-def load_devices():
-    """Load the locally stored device names."""
-    try:
-        data = json.loads(REGISTRY.read_text(encoding="utf-8"))
-        devices = data.get("devices", [])
-        return [
-            device for device in devices
-            if isinstance(device, dict)
-            and isinstance(device.get("name"), str)
-        ]
-    except (OSError, json.JSONDecodeError):
-        return []
-
-
-def save_devices(devices):
-    """Save device names without storing credentials."""
-    data = {
-        "devices": devices,
-        "security": {
-            "require_authentication": True,
-            "require_user_approval": True,
-            "encrypted_connections_only": True
-        }
-    }
-
-    REGISTRY.write_text(
-        json.dumps(data, indent=2),
-        encoding="utf-8"
-    )
-
-
 def refresh_devices():
     device_list.delete(0, tk.END)
 
-    for device in load_devices():
-        device_list.insert(tk.END, device["name"])
+    for device in list_devices():
+        label = device["name"]
+        device_id = device.get("rustdesk_id", "")
+        if device_id:
+            label += f" — {device_id}"
+        device_list.insert(tk.END, label)
 
 
-def add_device():
+def add_device_dialog():
     name = simpledialog.askstring(
         "Register device",
         "Enter a name for your authorized computer:",
         parent=root
     )
-
-    if not name or not name.strip():
+    if not name:
         return
 
-    name = name.strip()
-    devices = load_devices()
-
-    if any(d["name"].casefold() == name.casefold()
-           for d in devices):
-        messagebox.showinfo(
-            "Already registered",
-            "That device name is already in the list."
-        )
-        return
-
-    devices.append({"name": name})
-    try:
-        save_devices(devices)
-        refresh_devices()
-        messagebox.showinfo(
-            "Device added",
-            "Device name saved locally. This does not connect it."
-        )
-    except OSError as exc:
-        messagebox.showerror(
-            "Save failed",
-            str(exc)
-        )
-
-
-def remove_device():
-    selection = device_list.curselection()
-
-    if not selection:
-        messagebox.showinfo(
-            "Select a device",
-            "Choose a device name first."
-        )
-        return
-
-    name = device_list.get(selection[0])
-
-    if not messagebox.askyesno(
-        "Remove device",
-        f"Remove '{name}' from this local list?"
-    ):
-        return
-
-    devices = [
-        d for d in load_devices()
-        if d["name"] != name
-    ]
-
-    try:
-        save_devices(devices)
-        refresh_devices()
-    except OSError as exc:
-        messagebox.showerror("Save failed", str(exc))
-
-
-def connect_device():
-    """Ask for a RustDesk ID and launch an installed client."""
     device_id = simpledialog.askstring(
-        "Connect with RustDesk",
-        "Enter the RustDesk ID of a computer you are authorized to access:",
+        "Device ID",
+        "Enter its RustDesk ID (optional):",
         parent=root
     )
-
-    if not device_id:
+    if device_id is None:
         return
 
-    device_id = device_id.strip()
+    try:
+        add_device(name, device_id)
+        refresh_devices()
+        messagebox.showinfo(
+            "Saved",
+            "Device record saved locally. This does not authorize access."
+        )
+    except (ValueError, OSError) as exc:
+        messagebox.showerror("Could not add device", str(exc))
 
-    if not re.fullmatch(r"[A-Za-z0-9-]{6,32}", device_id):
-        messagebox.showerror(
-            "Invalid ID",
-            "Check the device ID and try again."
+
+def remove_selected():
+    selection = device_list.curselection()
+    if not selection:
+        messagebox.showinfo("Select device", "Choose a device first.")
+        return
+
+    records = list_devices()
+    index = selection[0]
+
+    if index >= len(records):
+        refresh_devices()
+        return
+
+    name = records[index]["name"]
+
+    if messagebox.askyesno(
+        "Remove device",
+        f"Remove '{name}' from this local registry?"
+    ):
+        try:
+            remove_device(name)
+            refresh_devices()
+        except OSError as exc:
+            messagebox.showerror("Could not remove device", str(exc))
+
+
+def connect_selected():
+    selection = device_list.curselection()
+    if not selection:
+        messagebox.showinfo("Select device", "Choose a device first.")
+        return
+
+    records = list_devices()
+    index = selection[0]
+    if index >= len(records):
+        refresh_devices()
+        return
+
+    device_id = records[index].get("rustdesk_id", "")
+    if not device_id:
+        messagebox.showinfo(
+            "Missing ID",
+            "Edit this device record to add its RustDesk ID."
         )
         return
 
     client = shutil.which("rustdesk")
-
     if not client:
         messagebox.showinfo(
             "RustDesk not found",
-            "Install the official RustDesk client on this computer:\n"
-            + RUSTDESK_URL
+            "Install the official client from " + RUSTDESK_URL
         )
         webbrowser.open(RUSTDESK_URL)
         return
 
+    if not messagebox.askyesno(
+        "Confirm connection",
+        "Only continue if you are authorized to access this device.\n\n"
+        "Open RustDesk for " + records[index]["name"] + "?"
+    ):
+        return
+
     try:
-        # Client command-line behavior can vary by version.
         subprocess.Popen([client, "--connect", device_id])
-        messagebox.showinfo(
-            "Client launched",
-            "RustDesk was asked to open. Complete its normal "
-            "authentication and approval steps."
-        )
     except OSError as exc:
-        messagebox.showerror(
-            "Launch failed",
-            str(exc)
-        )
-
-
-def open_rustdesk():
-    webbrowser.open(RUSTDESK_URL)
-
-
-def open_guide():
-    webbrowser.open(RUSTDESK_GUIDE)
+        messagebox.showerror("Launch failed", str(exc))
 
 
 def show_status():
     messagebox.showinfo(
         "Toolkit status",
-        f"Dashboard platform: {platform.system()}\n\n"
-        f"Registered local device names: {len(load_devices())}\n\n"
-        "Remote sessions are not verified by this dashboard.\n"
-        "RustDesk must be installed and configured separately."
+        f"Platform: {platform.system()}\n"
+        f"Registered local records: {len(list_devices())}\n\n"
+        "The dashboard does not verify remote session status."
     )
 
 
 root = tk.Tk()
 root.title("Remote Desktop USB Toolkit")
-root.geometry("480x570")
-root.minsize(360, 460)
+root.geometry("500x560")
+root.minsize(360, 450)
 
 tk.Label(
     root,
     text="Remote Desktop USB Toolkit",
     font=("Arial", 16, "bold")
-).pack(pady=(18, 5))
+).pack(pady=(16, 6))
 
 tk.Label(
     root,
     text=f"Operating system: {platform.system()}"
-).pack(pady=3)
+).pack()
 
-tk.Label(
-    root,
-    text="Local device names",
-    font=("Arial", 11, "bold")
-).pack(pady=(12, 4))
-
-device_list = tk.Listbox(root, height=9, width=42)
-device_list.pack(fill="both", expand=True, padx=18, pady=6)
+device_list = tk.Listbox(root, height=12, width=48)
+device_list.pack(fill="both", expand=True, padx=16, pady=12)
 
 buttons = [
-    ("Add Device Name", add_device),
-    ("Remove Selected Name", remove_device),
+    ("Add Authorized Device Record", add_device_dialog),
+    ("Remove Selected Device", remove_selected),
     ("Refresh Device List", refresh_devices),
-    ("Connect Using RustDesk", connect_device),
-    ("Get RustDesk Client", open_rustdesk),
-    ("Read Connection Guide", open_guide),
+    ("Connect Selected with RustDesk", connect_selected),
+    ("Open RustDesk Website", lambda: webbrowser.open(RUSTDESK_URL)),
+    ("Read Connection Guide", lambda: webbrowser.open(RUSTDESK_GUIDE)),
     ("Check Dashboard Status", show_status),
 ]
 
 for label, action in buttons:
-    tk.Button(
-        root,
-        text=label,
-        command=action,
-        width=30
-    ).pack(pady=3)
+    tk.Button(root, text=label, command=action).pack(pady=3)
 
 tk.Label(
     root,
-    text="Device names are local records, not proof of authorization.",
+    text="Local records are not proof of authorization.",
     wraplength=420
-).pack(pady=(10, 14))
+).pack(pady=(8, 12))
 
 refresh_devices()
 root.mainloop()
