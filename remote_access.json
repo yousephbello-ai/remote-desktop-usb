@@ -1,0 +1,10 @@
+
+{
+  "provider": "RustDesk",
+  "connection_mode": "approved_devices_only",
+  "require_authentication": true,
+  "require_user_approval": true,
+  "require_encryption": true,
+  "allow_unattended_access": false,
+  "connection_status": "not_configured"
+}
