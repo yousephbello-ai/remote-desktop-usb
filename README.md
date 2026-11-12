@@ -13,7 +13,7 @@ For source-code use, Python 3 is required:
 - Windows: double-click `Run-Toolkit-Windows.bat`.
 - Linux/macOS: run `chmod +x run-toolkit-unix.sh && ./run-toolkit-unix.sh`.
 
-A Windows x64 portable executable package is built by the **Build Windows portable package** GitHub Actions workflow. Open the repository Actions tab, select the latest successful run, and download the `RemoteDesktopToolkit-Windows-x64` artifact. Extract the ZIP to a USB drive and double-click `Run-Toolkit.bat`. The packaged launcher does not require Python; it still does not install RustDesk or change remote-access settings. Artifacts are temporary workflow downloads (30-day retention), not a permanent release.
+Windows, Linux, and macOS portable packages are built by the **Build cross-platform portable packages** GitHub Actions workflow. Open the repository Actions tab, select the latest successful run, and download the artifact matching your operating system. Extract the ZIP to a USB drive. On Windows, double-click `Run-Toolkit.bat`; on Linux/macOS, run `./Run-Toolkit.sh`. The packaged launchers do not require Python; they still do not install RustDesk or change remote-access settings. Artifacts are temporary workflow downloads (30-day retention), not permanent releases.
 
 The launcher detects the current OS, offers a read-only system check, checks common locations for RustDesk, opens the official download page, and displays setup guidance. It does not install RustDesk, enable remote access, collect credentials, or change system settings.
 
