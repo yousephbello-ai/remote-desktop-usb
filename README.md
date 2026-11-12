@@ -36,7 +36,7 @@ Use a private, authenticated VPN between devices where appropriate. Do **not** f
 - `linux/`: Linux check script and setup guidance.
 - `macos/`: macOS check script and setup guidance.
 - `portable/`: instructions for a normal USB toolkit.
-- `bootable/`: Rufus and boot-media guidance.
+- `bootable/`: boot-media guide and a read-only SHA-256 ISO verifier.
 - `docs/`: architecture and connection guides.
 - `tests/`: basic launcher tests.
 - `.github/workflows/`: automated Python checks on pushes and pull requests.
@@ -52,7 +52,7 @@ Use a private, authenticated VPN between devices where appropriate. Do **not** f
 ## USB options
 A normal USB drive can carry this toolkit and its scripts. It does not bypass authentication or automatically configure a computer.
 
-The bootable folder contains instructions only, not an ISO. Rufus writes a genuine OS image to USB and may erase it. Obtain images from their official publishers and verify them. A live OS does not automatically configure the installed OS for remote access. Mac boot media has model-specific requirements; Rufus is not a universal Mac boot-media solution.
+The bootable folder contains instructions and a read-only SHA-256 verifier, not an ISO. See [the bootable USB guide](bootable/BOOTABLE_USB_GUIDE.md). Rufus writes a genuine OS image to USB and may erase it. Obtain images from their official publishers and verify them. A live OS does not automatically configure the installed OS for remote access. Mac boot media has model-specific requirements; Rufus is not a universal Mac boot-media solution.
 
 ## Security rules
 - Never store passwords, VPN authentication keys, recovery codes, or private keys in Git or on an unencrypted USB drive.
