@@ -7,11 +7,14 @@ on:
     paths:
       - "launcher.py"
       - "README.md"
+      - "LICENSE"
       - "docs/**"
       - "scripts/**"
       - "linux/**"
       - "macos/**"
       - "config/**"
+      - "portable/**"
+      - "bootable/**"
       - ".github/workflows/windows-portable.yml"
 
 permissions:
@@ -35,12 +38,19 @@ jobs:
         shell: pwsh
         run: |
           $target = "dist/RemoteDesktopToolkit"
-          Copy-Item README.md $target/
-          foreach ($folder in @("docs", "scripts", "linux", "macos", "config")) {
+          Copy-Item README.md, LICENSE $target/
+          foreach ($folder in @("docs", "scripts", "linux", "macos", "config", "portable", "bootable")) {
             Copy-Item $folder "$target/$folder" -Recurse
           }
-          @("@echo off", "cd /d %~dp0", "RemoteDesktopToolkit.exe") |
+          @("@echo off", "setlocal", "cd /d %~dp0", "RemoteDesktopToolkit.exe") |
             Set-Content "$target/Run-Toolkit.bat" -Encoding ascii
+          if (-not (Test-Path "$target/RemoteDesktopToolkit.exe")) { throw "Launcher executable missing" }
+          if (-not (Test-Path "$target/docs/CONNECT_TWO_DEVICES.md")) { throw "Connection guide missing" }
+      - name: Smoke-test packaged launcher
+        shell: pwsh
+        run: |
+          "0" | & "dist/RemoteDesktopToolkit/RemoteDesktopToolkit.exe"
+          if ($LASTEXITCODE -ne 0) { throw "Portable launcher smoke test failed" }
       - name: Package ZIP
         run: Compress-Archive -Path dist/RemoteDesktopToolkit -DestinationPath dist/RemoteDesktopToolkit-Windows-x64.zip
       - name: Upload portable package
