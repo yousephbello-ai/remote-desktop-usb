@@ -9,9 +9,11 @@ A cross-platform starter toolkit for computers you own or are explicitly authori
 - **RustDesk client:** official clients are available for Windows, macOS, Linux and Android. The toolkit can check common locations for an installed client and open the official download page.
 
 ## Launch the toolkit
-Python 3 is required for the menu launcher:
+For source-code use, Python 3 is required:
 - Windows: double-click `Run-Toolkit-Windows.bat`.
 - Linux/macOS: run `chmod +x run-toolkit-unix.sh && ./run-toolkit-unix.sh`.
+
+A Windows x64 portable executable package is built by the **Build Windows portable package** GitHub Actions workflow. Open the repository Actions tab, select the latest successful run, and download the `RemoteDesktopToolkit-Windows-x64` artifact. Extract the ZIP to a USB drive and double-click `Run-Toolkit.bat`. The packaged launcher does not require Python; it still does not install RustDesk or change remote-access settings. Artifacts are temporary workflow downloads (30-day retention), not a permanent release.
 
 The launcher detects the current OS, offers a read-only system check, checks common locations for RustDesk, opens the official download page, and displays setup guidance. It does not install RustDesk, enable remote access, collect credentials, or change system settings.
 
