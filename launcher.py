@@ -11,7 +11,8 @@ import subprocess
 import sys
 import webbrowser
 
-ROOT = Path(__file__).resolve().parent
+ROOT = (Path(sys.executable).resolve().parent if getattr(sys, "frozen", False)
+        else Path(__file__).resolve().parent)
 RUSTDESK_DOWNLOADS = "https://rustdesk.com/download/"
 
 def find_rustdesk():
