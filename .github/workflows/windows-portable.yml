@@ -1,0 +1,52 @@
+name: Build Windows portable package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "launcher.py"
+      - "README.md"
+      - "docs/**"
+      - "scripts/**"
+      - "linux/**"
+      - "macos/**"
+      - "config/**"
+      - ".github/workflows/windows-portable.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install packager
+        run: python -m pip install --upgrade pip pyinstaller
+      - name: Build portable launcher
+        run: pyinstaller --noconfirm --clean --onedir --name RemoteDesktopToolkit launcher.py
+      - name: Include toolkit resources
+        shell: pwsh
+        run: |
+          $target = "dist/RemoteDesktopToolkit"
+          Copy-Item README.md $target/
+          foreach ($folder in @("docs", "scripts", "linux", "macos", "config")) {
+            Copy-Item $folder "$target/$folder" -Recurse
+          }
+          @("@echo off", "cd /d %~dp0", "RemoteDesktopToolkit.exe") |
+            Set-Content "$target/Run-Toolkit.bat" -Encoding ascii
+      - name: Package ZIP
+        run: Compress-Archive -Path dist/RemoteDesktopToolkit -DestinationPath dist/RemoteDesktopToolkit-Windows-x64.zip
+      - name: Upload portable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: RemoteDesktopToolkit-Windows-x64
+          path: dist/RemoteDesktopToolkit-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30
