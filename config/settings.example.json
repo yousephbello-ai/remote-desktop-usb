@@ -1,0 +1,8 @@
+{
+  "projectName": "Remote Desktop USB Toolkit",
+  "connectionMethod": "private-vpn",
+  "recommendedVpn": "Tailscale",
+  "rdpPort": 3389,
+  "exposeRdpToPublicInternet": false,
+  "storeCredentialsOnUsb": false
+}
