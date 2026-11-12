@@ -30,5 +30,13 @@ class LauncherTests(unittest.TestCase):
     def test_rustdesk_integration_document_exists(self):
         self.assertTrue((ROOT / "docs" / "RUSTDESK_INTEGRATION.md").is_file())
 
+    def test_attended_connection_guide_exists(self):
+        guide = ROOT / "docs" / "CONNECT_TWO_DEVICES.md"
+        self.assertTrue(guide.is_file())
+        self.assertIn("one-time password", guide.read_text(encoding="utf-8"))
+
+    def test_launcher_exposes_attended_connection_guide(self):
+        self.assertTrue(callable(launcher.show_connection_steps))
+
 if __name__ == "__main__":
     unittest.main()
