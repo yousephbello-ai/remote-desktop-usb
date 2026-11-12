@@ -14,8 +14,11 @@ Python 3 is required for the menu launcher:
 
 The launcher detects the current OS, offers a read-only system check, and displays the relevant setup guidance. It does not enable remote access or change system settings.
 
+## Remote desktop engine
+The planned cross-platform remote desktop engine is **RustDesk**. See [the RustDesk integration plan](docs/RUSTDESK_INTEGRATION.md) for the connection modes, security rules, and implementation stages. The current launcher does not yet install or configure RustDesk.
+
 ## Secure internet connectivity
-Use a private, authenticated VPN such as Tailscale between devices. Do **not** forward RDP (TCP 3389) or VNC ports directly to the public internet. Authenticate each device and restrict access to trusted users.
+Use a private, authenticated VPN such as Tailscale between devices where appropriate. Do **not** forward RDP (TCP 3389) or VNC ports directly to the public internet. Authenticate each device and restrict access to trusted users.
 
 ## Repository layout
 - `launcher.py`: cross-platform menu launcher (Python 3).
@@ -26,6 +29,7 @@ Use a private, authenticated VPN such as Tailscale between devices. Do **not** f
 - `macos/`: macOS check script and setup guidance.
 - `portable/`: instructions for a normal USB toolkit.
 - `bootable/`: Rufus and boot-media guidance.
+- `docs/`: architecture and integration documentation.
 - `tests/`: basic launcher tests.
 - `.github/workflows/`: automated Python checks on pushes and pull requests.
 
@@ -35,7 +39,7 @@ Use a private, authenticated VPN such as Tailscale between devices. Do **not** f
 3. On Linux, run `chmod +x linux/check-system.sh && ./linux/check-system.sh`.
 4. On macOS, run `chmod +x macos/check-system.sh && ./macos/check-system.sh`.
 5. Install and authenticate your private VPN on both endpoints, then enable the relevant remote access service using that OS's supported settings.
-6. Connect using an authorized account and the target device's private VPN address or private DNS name.
+6. For the planned RustDesk workflow, follow the integration plan and official documentation. Do not enable unattended access unless the device owner or authorized administrator explicitly chooses it.
 
 ## USB options
 A normal USB drive can carry this toolkit and its scripts. It does not bypass authentication or automatically configure a computer.
@@ -49,4 +53,4 @@ The bootable folder contains instructions only, not an ISO. Rufus writes a genui
 - Keep operating systems and remote-access clients updated.
 
 ## Current scope and limitations
-This repository is a usable starter launcher and configuration toolkit, not a finished one-click remote desktop product. Linux/macOS scripts currently perform read-only checks; host configuration remains OS- and environment-specific. The bootable folder is documentation only; no bootable image is included. Windows RDP hosting requires a supported Windows edition. The GitHub Actions workflow runs Python launcher checks, not full operating-system integration tests.
+This repository is a usable starter launcher and configuration toolkit, not a finished one-click remote desktop product. RustDesk is selected as the planned remote desktop engine, but installation detection and client configuration are not yet implemented. Linux/macOS scripts currently perform read-only checks; host configuration remains OS- and environment-specific. The bootable folder is documentation only; no bootable image is included. Windows RDP hosting requires a supported Windows edition. The GitHub Actions workflow runs Python launcher checks, not full operating-system integration tests.
