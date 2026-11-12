@@ -1,0 +1,15 @@
+# Secrets and machine-specific settings
+.env
+*.key
+*.pem
+*.pfx
+*.p12
+secrets.json
+settings.local.json
+
+# Build artifacts
+dist/
+*.iso
+*.img
+*.vhd
+*.vhdx
