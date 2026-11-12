@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+; Optional Windows RDP settings for supported editions only.
+; Prefer scripts/Enable-RDP.ps1 because it asks for confirmation.
+; Never expose TCP 3389 directly to the public internet.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server]
+"fDenyTSConnections"=dword:00000000
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp]
+"UserAuthentication"=dword:00000001
