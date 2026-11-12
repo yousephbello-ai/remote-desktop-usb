@@ -63,6 +63,14 @@ def run_read_only_check():
         return
     subprocess.run(command, check=False)
 
+def show_connection_steps():
+    """Print attended-session steps without collecting IDs or credentials."""
+    guide = ROOT / "docs" / "CONNECT_TWO_DEVICES.md"
+    if guide.is_file():
+        print("\\n" + guide.read_text(encoding="utf-8"))
+    else:
+        print("Connection guide not found. See docs/CONNECT_TWO_DEVICES.md.")
+
 def show_guidance():
     system = platform.system()
     print("\nDetected platform:", system)
@@ -91,6 +99,7 @@ def main():
         print("3. Check whether RustDesk appears to be installed")
         print("4. Open the official RustDesk download page")
         print("5. Display project README")
+        print("6. Show attended connection walkthrough")
         print("0. Exit")
         choice = input("Choose an option: ").strip()
         if choice == "1":
@@ -106,10 +115,12 @@ def main():
         elif choice == "5":
             readme = ROOT / "README.md"
             print(readme.read_text(encoding="utf-8") if readme.exists() else "README.md not found.")
+        elif choice == "6":
+            show_connection_steps()
         elif choice == "0":
             return
         else:
-            print("Please choose 0, 1, 2, 3, 4, or 5.")
+            print("Please choose 0, 1, 2, 3, 4, 5, or 6.")
 
 if __name__ == "__main__":
     try:
