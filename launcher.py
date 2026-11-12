@@ -67,7 +67,7 @@ def show_connection_steps():
     """Print attended-session steps without collecting IDs or credentials."""
     guide = ROOT / "docs" / "CONNECT_TWO_DEVICES.md"
     if guide.is_file():
-        print("\\n" + guide.read_text(encoding="utf-8"))
+        print("\n" + guide.read_text(encoding="utf-8"))
     else:
         print("Connection guide not found. See docs/CONNECT_TWO_DEVICES.md.")
 
