@@ -7,16 +7,27 @@ A cross-platform starter toolkit for computers you own or are explicitly authori
 - **Linux:** read-only system check and guidance for distribution-specific remote desktop servers such as xrdp.
 - **macOS:** read-only system check and guidance for Screen Sharing or Remote Management.
 
+## Launch the toolkit
+Python 3 is required for the menu launcher:
+- Windows: double-click `Run-Toolkit-Windows.bat`.
+- Linux/macOS: run `chmod +x run-toolkit-unix.sh && ./run-toolkit-unix.sh`.
+
+The launcher detects the current OS, offers a read-only system check, and displays the relevant setup guidance. It does not enable remote access or change system settings.
+
 ## Secure internet connectivity
 Use a private, authenticated VPN such as Tailscale between devices. Do **not** forward RDP (TCP 3389) or VNC ports directly to the public internet. Authenticate each device and restrict access to trusted users.
 
 ## Repository layout
+- `launcher.py`: cross-platform menu launcher (Python 3).
+- `Run-Toolkit-Windows.bat`, `run-toolkit-unix.sh`: launch helpers.
 - `scripts/`: Windows PowerShell checks, enable and disable scripts.
 - `config/`: optional Windows registry settings and non-secret example JSON.
 - `linux/`: Linux check script and setup guidance.
 - `macos/`: macOS check script and setup guidance.
 - `portable/`: instructions for a normal USB toolkit.
 - `bootable/`: Rufus and boot-media guidance.
+- `tests/`: basic launcher tests.
+- `.github/workflows/`: automated Python checks on pushes and pull requests.
 
 ## Getting started
 1. Review scripts before running them.
@@ -37,5 +48,5 @@ The bootable folder contains instructions only, not an ISO. Rufus writes a genui
 - Do not use this toolkit to bypass logins, consent, or access controls.
 - Keep operating systems and remote-access clients updated.
 
-## Status
-This is an initial starter toolkit, not yet a one-click installer or finished bootable image. Linux/macOS scripts currently perform read-only checks; their host configuration remains OS- and environment-specific.
+## Current scope and limitations
+This repository is a usable starter launcher and configuration toolkit, not a finished one-click remote desktop product. Linux/macOS scripts currently perform read-only checks; host configuration remains OS- and environment-specific. The bootable folder is documentation only; no bootable image is included. Windows RDP hosting requires a supported Windows edition. The GitHub Actions workflow runs Python launcher checks, not full operating-system integration tests.
