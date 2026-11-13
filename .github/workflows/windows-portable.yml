@@ -38,7 +38,8 @@ jobs:
         shell: pwsh
         run: |
           $target = "dist/RemoteDesktopToolkit"
-          Copy-Item README.md, LICENSE $target/
+          Copy-Item README.md $target/
+          if (Test-Path LICENSE) { Copy-Item LICENSE $target/ }
           foreach ($folder in @("docs", "scripts", "linux", "macos", "config", "portable", "bootable")) {
             Copy-Item $folder "$target/$folder" -Recurse
           }
