@@ -52,7 +52,8 @@ jobs:
         shell: pwsh
         run: |
           $target = "dist/RemoteDesktopToolkit"
-          Copy-Item README.md, LICENSE $target/
+          Copy-Item README.md $target/
+          if (Test-Path LICENSE) { Copy-Item LICENSE $target/ }
           foreach ($folder in @("docs", "scripts", "linux", "macos", "config", "portable", "bootable")) {
             Copy-Item $folder "$target/$folder" -Recurse
           }
@@ -63,7 +64,8 @@ jobs:
         shell: bash
         run: |
           target="dist/RemoteDesktopToolkit"
-          cp README.md LICENSE "$target/"
+          cp README.md "$target/"
+          if [ -f LICENSE ]; then cp LICENSE "$target/"; fi
           cp -R docs scripts linux macos config portable bootable "$target/"
           cat > "$target/Run-Toolkit.sh" <<'EOF'
           #!/usr/bin/env sh
